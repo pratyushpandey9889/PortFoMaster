@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  portfolio         Portfolio?
+  bioGenerationLogs BioGenerationLog[]
+}
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String   @default("")
+  title     String   @default("")
+  location  String   @default("")
+  bio       String   @default("")
+  theme     String   @default("minimal")
+  photoUrl  String?
+  updatedAt DateTime @updatedAt
+
+  skills      Skill[]
+  experiences WorkExperience[]
+  projects    Project[]
+  educations  Education[]
+  socialLinks SocialLink[]
+}
+
+model Skill {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  name        String
+}
+
+model WorkExperience {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  company     String
+  role        String
+  startDate   String
+  endDate     String?
+  isCurrent   Boolean   @default(false)
+  description String    @default("")
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String    @default("")
+  techList    String
+  githubUrl   String?
+  liveUrl     String?
+}
+
+model Education {
+  id             String    @id @default(cuid())
+  portfolioId    String
+  portfolio      Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  degree         String
+  institution    String
+  graduationYear Int
+}
+
+model SocialLink {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type        String
+  url         String
+}
+
+model BioGenerationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
